@@ -42,5 +42,5 @@ dmypy.json
 *.ui~
 
 /.coverage
-/.ipynb_checkpoints/
+.ipynb_checkpoints/
 /unittest.xml

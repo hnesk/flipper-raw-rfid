@@ -7,6 +7,7 @@ A python library for reading and analyzing Flipper Zero raw RFID files (`tag.[ap
  * [Usage](#usage)
    * [As a library](#as-a-library)
    * [From commandline](#from-commandline)
+ * [Tutorial](#tutorial)
  
 ## Installation
 
@@ -42,6 +43,13 @@ pd = rifl.pulse_and_durations()
 plt.plot(signal[0:20000])
 
 ```
+
+results in: 
+
+![Plot of the RFID signal with matplotlib](docs/signal-plot.png)
+
+
+There is also a short [tutorial notebook](docs/rifl-tutorial-1.ipynb)
 
 ### From commandline
 
@@ -102,3 +110,7 @@ Pulse and duration (pad) format:
     pulse1, duration1
     ....
 ``` 
+
+# Tutorial
+
+There is a short [RFID tutorial notebook](docs/rifl-tutorial-1.ipynb) to see if there is data in the recording and what to do with it.
