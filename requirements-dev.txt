@@ -1,0 +1,8 @@
+wheel
+setuptools
+build
+unittest-xml-reporting
+html-testRunner
+flake8
+mypy
+codespell
