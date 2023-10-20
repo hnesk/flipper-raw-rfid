@@ -28,10 +28,10 @@ build: clean-build
 	$(PYTHON) -m build
 
 testpypi: clean-build build
-	twine upload --repository testpypi ./dist/browse[_-]ocrd*.{tar.gz,whl}
+	twine upload --repository testpypi ./dist/flipper[_-]raw[_-]rfid*.{tar.gz,whl}
 
 pypi: clean-build build
-	twine upload ./dist/browse[_-]ocrd*.{tar.gz,whl}
+	twine upload ./dist/flipper[_-]raw[_-]rfid*.{tar.gz,whl}
 
 flake8: deps-dev
 	$(PYTHON) -m flake8 flipper_raw_rfid tests
