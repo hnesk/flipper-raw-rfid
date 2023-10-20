@@ -2,21 +2,19 @@
 
 A python library for reading and analyzing Flipper Zero raw RFID files (`tag.[ap]sk.raw`)
  * [Installation](#installation)
-
-    <!-- * [Via pip](#via-pip) -->
+    * [Via pip](#via-pip)
     * [From source](#from-source)
  * [Usage](#usage)
+   * [As a library](#as-a-library)
+   * [From commandline](#from-commandline)
  
 ## Installation
-
-<!--
 
 ### Via pip
 
 ```bash
 pip install flipper-raw-rfid
 ```
--->
 
 ### From source
 ```bash
@@ -103,5 +101,4 @@ Pulse and duration (pad) format:
     pulse0, duration0
     pulse1, duration1
     ....
-
-
+``` 
