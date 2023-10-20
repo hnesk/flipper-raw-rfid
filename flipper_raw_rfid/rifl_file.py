@@ -1,6 +1,22 @@
+"""
+Classes to load a raw rfid file from flipper (xyz.ask.raw or xyz.psk.raw)
+
+Usage:
+
+rifl = RiflFile.load('path/to/raw.ask.raw')
+# for the binary signal
+signal = rifl.signal()
+# or for pulse and duration values
+pd = rifl.pulse_and_durations()
+
+frequency = rifl.header.frequency
+duty_cycle = rifl.header.duty_cycle
+
+
+"""
 from __future__ import annotations
 
-from typing import BinaryIO, Generator
+from typing import BinaryIO, Generator, Any
 from struct import unpack, error as struct_error
 from pathlib import Path
 from dataclasses import dataclass
@@ -12,6 +28,13 @@ from flipper_raw_rfid.utils import batched, pad_to_signal, Signal, PulseAndDurat
 
 LFRFID_RAW_FILE_MAGIC = 0x4C464952  # binary string "RIFL"
 LFRFID_RAW_FILE_VERSION = 1
+
+
+class RiflError(ValueError):
+    def __init__(self, message: Any, file: BinaryIO):
+        super().__init__(message)
+        # Now for your custom code...
+        self.file = file
 
 
 @dataclass
@@ -28,11 +51,14 @@ class RiflHeader:
 
     @staticmethod
     def from_bytes(f: BinaryIO) -> RiflHeader:
-        magic, version, frequency, duty_cycle, max_buffer_size = unpack('IIffI', f.read(20))
+        try:
+            magic, version, frequency, duty_cycle, max_buffer_size = unpack('IIffI', f.read(20))
+        except struct_error:
+            raise RiflError('Not a RIFL file', f)
         if magic != LFRFID_RAW_FILE_MAGIC:
-            raise ValueError('Not a RIFL file')
+            raise RiflError('Not a RIFL file', f)
         if version != LFRFID_RAW_FILE_VERSION:
-            raise ValueError(f'Unsupported RIFL Version {version}')
+            raise RiflError(f'Unsupported RIFL Version {version}', f)
 
         return RiflHeader(magic, version, frequency, duty_cycle, max_buffer_size)
 
@@ -41,15 +67,6 @@ class RiflHeader:
 class RiflFile:
     """
     A raw rfid file from flipper (xyz.ask.raw or xyz.psk.raw)
-
-    Usage:
-
-    with RiflFile.open('path/to/raw.ask.raw') as rifl:
-        # for the binary signal
-        signal = rifl.signal()
-        # or for pulse and duration values
-        pd = rifl.pulse_and_durations()
-
 
     """
     header: RiflHeader
@@ -89,10 +106,10 @@ class RiflFile:
                 # No more bytes left, EOF
                 break
             if buffer_size > self.header.max_buffer_size:
-                raise ValueError(f'read pair: buffer size is too big  {buffer_size} > {self.header.max_buffer_size}')
+                raise RiflError(f'read pair: buffer size is too big  {buffer_size} > {self.header.max_buffer_size}', self.f)
             buffer = self.f.read(buffer_size)
             if len(buffer) != buffer_size:
-                raise ValueError(f'Tried to read  {buffer_size} bytes got only {len(buffer)}')
+                raise RiflError(f'Tried to read  {buffer_size} bytes got only {len(buffer)}', self.f)
             yield buffer
 
     def pulse_and_durations_generator(self) -> Generator[tuple[int, int], None, None]:
@@ -159,3 +176,6 @@ class RiflFile:
                 break
 
         return res, i + 1
+
+
+__all__ = ['RiflFile', 'RiflError']
