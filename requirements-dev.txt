@@ -6,3 +6,4 @@ html-testRunner
 flake8
 mypy
 codespell
+matplotlib
