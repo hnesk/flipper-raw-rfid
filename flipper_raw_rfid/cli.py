@@ -7,6 +7,7 @@ Description:
 Usage:
     flipper-raw-rfid convert [-f <format>] RAW_FILE [OUTPUT_FILE]
     flipper-raw-rfid plot RAW_FILE
+    flipper-raw-rfid check RAW_FILE
     flipper-raw-rfid (-h | --help)
     flipper-raw-rfid --version
 
@@ -18,15 +19,15 @@ Options:
     -h --help                 Show this screen.
     --version                 Show version.
     -f --format=(pad|signal)  Output format: "pad" (=Pulse And Duration) is the internal format of the Flipper Zero,
-                              each line represents a pulse and a duration value measured in samples, see
+                              each line represents a pulse and a duration value measured in µs, see
                               "Pulse and duration format" below.
                               In "signal" format the pulses are written out as a reconstructed signal with a "1" marking a
                               sample with high value and "0" marking a sample with low value [default: pad]
 
 Pulse and duration format:
 
-    column 0: pulse - (number of samples while output high) and
-    column 1: duration - (number of samples till next signal)
+    column 0: pulse - (µs while output high) and
+    column 1: duration - (µs till next signal)
 
     Diagram:
 
@@ -50,7 +51,8 @@ import sys
 from typing import Any, Generator, Iterable, IO
 
 from docopt import docopt, printable_usage
-from flipper_raw_rfid import RiflFile, RiflError, __version__, pad_to_signal
+from flipper_raw_rfid import RiflFile, RiflError, __version__, pad_to_signal, autocorrelate
+from scipy import signal as scipy_signal
 
 
 @contextlib.contextmanager
@@ -125,12 +127,24 @@ def plot(raw: str) -> int:
     return 0
 
 
+def check(raw: str) -> int:
+    rifl = RiflFile.load(raw)
+    pads = rifl.pulse_and_durations()
+    signal = pad_to_signal(pads)
+    signal_autocorrelation = autocorrelate(signal)
+    peaks, _ = scipy_signal.find_peaks(signal_autocorrelation, height=0.8, prominence=1)
+    print(peaks)
+    return 0
+
+
 def process(args: dict[str, Any]) -> int:
     try:
         if args['convert']:
             return convert(args['RAW_FILE'], args['OUTPUT_FILE'], args['--format'])
         elif args['plot']:
             return plot(args['RAW_FILE'])
+        elif args['check']:
+            return check(args['RAW_FILE'])
         else:
             print(printable_usage(__doc__))
             return 1
