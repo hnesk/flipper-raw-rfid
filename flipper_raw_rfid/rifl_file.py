@@ -23,8 +23,9 @@ from dataclasses import dataclass
 from contextlib import contextmanager
 
 import numpy
+import numpy.typing as npt
 
-from flipper_raw_rfid.utils import batched, pad_to_signal, Signal, PulseAndDurations
+from flipper_raw_rfid.utils import batched, pad_to_signal
 
 LFRFID_RAW_FILE_MAGIC = 0x4C464952  # binary string "RIFL"
 LFRFID_RAW_FILE_VERSION = 1
@@ -120,11 +121,11 @@ class RiflFile:
             for pulse, duration in batched(RiflFile.read_varint(buffer), 2):
                 yield pulse, duration
 
-    def pulse_and_durations(self) -> PulseAndDurations:
+    def pulse_and_durations(self) -> npt.NDArray[numpy.int64]:
         """
         a nx2 numpy array with:
-        column 0: pulse - (number of samples while output high) and
-        column 1: duration - (number of samples till next signal)
+        column 0: pulse - (number of µs while output high) and
+        column 1: duration - (number of µs till next signal)
 
         Diagram:
 
@@ -142,7 +143,7 @@ class RiflFile:
             self._pulse_and_durations = numpy.array(list(self.pulse_and_durations_generator()))
         return self._pulse_and_durations
 
-    def signal(self) -> Signal:
+    def signal(self) -> npt.NDArray[numpy.int8]:
         """
         Reconstruct a binary signal from pulse and duration
         """
