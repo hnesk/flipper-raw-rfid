@@ -7,7 +7,7 @@ from flipper_raw_rfid.utils import batched, Peak
 import numpy.typing as npt
 
 
-def decode_lengths(pads:  npt.NDArray[numpy.int64], peaks: list[Peak]) -> npt.NDArray[numpy.int8]:
+def decode_lengths(pads: npt.NDArray[numpy.int64], peaks: list[Peak]) -> tuple[npt.NDArray[numpy.int8], int]:
     """
     Loops through pulses and durations and matches them to peaks
     Checks for the length of the peak as a multiple of the first peak and adds as many 1/0 to the result
@@ -16,7 +16,7 @@ def decode_lengths(pads:  npt.NDArray[numpy.int64], peaks: list[Peak]) -> npt.ND
     :param peaks: A list of peaks from find_peaks, the center frequencies should be more or less multiples of the first peak
     :return: The decoded bitstream
     """
-    result = []
+    result: list[int] = []
     position = 0
     result_position = None
     first_length = peaks[0].center
@@ -67,7 +67,7 @@ def decode_manchester(manchester: npt.NDArray[numpy.int8], biphase: bool = True)
         assert pair[0] != pair[1]
         result.append(pair[0 if biphase else 1])
 
-    return numpy.int8(result)
+    return numpy.array(result, dtype=numpy.int8)
 
 
 def to_str(bits: npt.NDArray[numpy.int8]) -> str:
@@ -121,16 +121,16 @@ def decode_em_4100(bits: npt.NDArray[numpy.int8]) -> npt.NDArray[numpy.int8]:
     assert numpy.all(row_parity % 2 == 0)
     nibbles = (datagrid[:10, :4] * [8, 4, 2, 1]).sum(axis=1)
 
-    return nibbles
+    return numpy.array(nibbles, dtype=numpy.int8)
 
 
-def longest_run(bits, value=1):
+def longest_run(bits: npt.NDArray[numpy.int8], value: int = 1) -> int:
     """
     Find the longest run of a value (1/0) in a bitstream
 
-    :param bits:
-    :param value:
-    :return:
+    :param bits: the bitstream
+    :param value: the value to look for
+    :return: index of the first bit of the longest run
     """
     longest = 0
     current = 0
