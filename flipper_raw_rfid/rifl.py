@@ -3,7 +3,7 @@ Classes to load/save a raw rfid file from flipper (xyz.ask.raw or xyz.psk.raw)
 
 Usage:
 
-rifl = RiflFile.load('path/to/raw.ask.raw')
+rifl = Rifl.load('path/to/raw.ask.raw')
 # get header values
 frequency = rifl.header.frequency
 duty_cycle = rifl.header.duty_cycle

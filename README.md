@@ -31,14 +31,15 @@ make install
 
 ``` python
 
-from flipper_raw_rfid import RiflFile
+from flipper_raw_rfid.rifl import Rifl
+from flipper_raw_rfid.utils import pad_to_signal
 import matplotlib.pyplot as plt 
 
-rifl = RiflFile.load('test/assets/Red354.ask.raw')
-# for the reconstructed binary signal
-signal = rifl.signal()
-# or for the raw pulse and duration values
-pd = rifl.pulse_and_durations()
+rifl = Rifl.load('test/assets/Red354.ask.raw')
+# Read the the raw pulse and duration values
+pad = rifl.pulse_and_durations
+# reconstructed binary signal
+signal = pad_to_signal(pad)
 
 plt.plot(signal[0:20000])
 
@@ -57,9 +58,9 @@ There is also a short [tutorial notebook](docs/rifl-tutorial-1.ipynb)
 # Plot a file (requires matplotlib)
 $ flipper-raw-rfid plot tests/assets/Red354.ask.raw
 # Dump the contents in pad format (see below) 
-flipper-raw-rfid convert --format=pad tests/assets/Red354.ask.raw Red354.pad.csv
+$ flipper-raw-rfid convert --format=pad tests/assets/Red354.ask.raw Red354.pad.csv
 # Dump the contents in signal format
-flipper-raw-rfid convert --format=signal tests/assets/Red354.ask.raw Red354.signal.csv
+$ flipper-raw-rfid convert --format=signal tests/assets/Red354.ask.raw Red354.signal.csv
 ```
 
 #### Commandline help
@@ -75,6 +76,7 @@ Description:
 Usage:
     flipper-raw-rfid convert [-f <format>] RAW_FILE [OUTPUT_FILE]
     flipper-raw-rfid plot RAW_FILE
+    flipper-raw-rfid check RAW_FILE
     flipper-raw-rfid (-h | --help)
     flipper-raw-rfid --version
 
