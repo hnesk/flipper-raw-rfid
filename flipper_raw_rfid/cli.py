@@ -99,7 +99,7 @@ def convert(raw: str, output: str, format: str = 'pad') -> int:
     with smart_open(output, 'w', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
         rifl = RiflFile.load(raw)
-        pads = rifl.pulse_and_durations()
+        pads = rifl.pulse_and_durations
         if format == 'pad':
             for pulse_and_duration in pads:
                 csvwriter.writerow(pulse_and_duration)
@@ -116,7 +116,7 @@ def plot(raw: str) -> int:
     except ModuleNotFoundError:
         raise RuntimeError('For the plot command you need matplotlib, install it with: pip install matplotlib')
     rifl = RiflFile.load(raw)
-    pads = rifl.pulse_and_durations()
+    pads = rifl.pulse_and_durations
     signal = pad_to_signal(pads)
     fig, ax = plt.subplots()
     ax.set(xlabel='Samples', ylabel='Signal', title='Reconstructed Signal')
@@ -129,7 +129,7 @@ def plot(raw: str) -> int:
 
 def check(raw: str) -> int:
     rifl = RiflFile.load(raw)
-    pads = rifl.pulse_and_durations()
+    pads = rifl.pulse_and_durations
     signal = pad_to_signal(pads)
     signal_autocorrelation = autocorrelate(signal)
     peaks, _ = scipy_signal.find_peaks(signal_autocorrelation, height=0.8, prominence=1)

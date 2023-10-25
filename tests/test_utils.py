@@ -78,7 +78,7 @@ class UtilsTest(TestCase):
             assert_array_equal(signal, rec_signal)
 
         test(self.a_signal)
-        test(self.load('Red354b.ask.raw').signal())
+        test(pad_to_signal(self.load('Red354b.ask.raw').pulse_and_durations))
 
     def test_pad_to_signal_and_back(self):
 
@@ -92,6 +92,6 @@ class UtilsTest(TestCase):
                 pos += pd[1]
 
         test(self.a_pad)
-        test(self.load('Red354b.ask.raw').pulse_and_durations())
+        test(self.load('Red354b.ask.raw').pulse_and_durations)
         # This fails because of 0 pulse width
         # test(self.load_pad('Red354.ask.raw'))

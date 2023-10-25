@@ -6,8 +6,8 @@ from typing import Iterable, Any, Generator, cast
 
 import numpy
 import numpy.typing as npt
-from scipy import ndimage
-from scipy import signal as scipy_signal
+from scipy.ndimage import gaussian_filter1d
+from scipy.signal import find_peaks as scipy_signal_find_peaks
 from scipy.optimize import minimize_scalar
 from skimage.filters import threshold_otsu
 
@@ -132,7 +132,7 @@ class Peak:
 
             def objective(thr: float) -> float:
                 # 1.0 for capturing enough and a little nudge to find bigger thresholds
-                return (to_capture > numpy.sum(my_excerpt[my_excerpt > thr])) - thr * 0.0001
+                return cast(float, 1.0 * (to_capture > numpy.sum(my_excerpt[my_excerpt > thr])) - thr * 0.0001)
 
             res = minimize_scalar(objective, (0, my_excerpt.max()))
             threshold = int(res.x)
@@ -147,7 +147,6 @@ class Peak:
             self.left + last + 1,
             my_excerpt[first:last].max()
         )
-
 
     def __contains__(self, v: float | int) -> bool:
         """
@@ -173,7 +172,7 @@ def histogram(values: npt.NDArray[Any], min_length: int = None) -> npt.NDArray[n
     return hist
 
 
-def find_peaks(distribution: npt.NDArray[Any], min_height: float = None, separate_peaks = True) -> list[Peak]:
+def find_peaks(distribution: npt.NDArray[Any], min_height: float = None, separate_peaks: bool = True) -> list[Peak]:
     """
     Simple wrapper around scipy.signal.find_peaks auto-tuned for histograms and sorted Peak[] as return value
 
@@ -184,7 +183,7 @@ def find_peaks(distribution: npt.NDArray[Any], min_height: float = None, separat
     """
     if min_height is None:
         min_height = numpy.mean(distribution)
-    peaks_center, pd = scipy_signal.find_peaks(distribution, height=min_height, prominence=min_height)
+    peaks_center, pd = scipy_signal_find_peaks(distribution, height=min_height, prominence=min_height)
     peaks = [Peak(l, c, r, h) for c, l, r, h in zip(peaks_center, pd['left_bases'], pd['right_bases'], pd['peak_heights'])]
 
     # Separate peaks that have overlap
@@ -233,7 +232,7 @@ def smooth(signal: npt.NDArray[numpy.int8], sigma: float = 10) -> npt.NDArray[nu
     :param sigma: sigma for gaussian filter, how much smoothing
     :return: smoothed signal
     """
-    return cast(npt.NDArray[numpy.float32], ndimage.gaussian_filter1d(numpy.float32(signal), sigma=sigma, mode='nearest'))
+    return cast(npt.NDArray[numpy.float32], gaussian_filter1d(numpy.float32(signal), sigma=sigma, mode='nearest'))
 
 
 def binarize(signal: npt.NDArray[numpy.float32], threshold: float = 0.5) -> npt.NDArray[numpy.int8]:
