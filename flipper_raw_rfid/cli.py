@@ -51,13 +51,17 @@ import sys
 from typing import Any, Generator, Iterable, IO
 
 from docopt import docopt, printable_usage
-from flipper_raw_rfid import RiflFile, RiflError, __version__, pad_to_signal, autocorrelate
+from flipper_raw_rfid import __version__
+from flipper_raw_rfid.rifl import Rifl, RiflError
+from flipper_raw_rfid.utils import pad_to_signal, autocorrelate
 from scipy import signal as scipy_signal
 
 
 @contextlib.contextmanager
 def smart_open(filename: str, mode: str = 'r', *args: Any, **kwargs: Any) -> Generator[IO[Any], None, None]:
-    '''Open files and i/o streams transparently.'''
+    """
+    Open files and i/o streams transparently.
+    """
     fh: IO[Any]
     if filename == '-' or filename is None:
         if 'r' in mode:
@@ -98,7 +102,7 @@ def convert(raw: str, output: str, format: str = 'pad') -> int:
     assert_in(format, {'signal', 'pad'}, 'Format')
     with smart_open(output, 'w', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
-        rifl = RiflFile.load(raw)
+        rifl = Rifl.load(raw)
         pads = rifl.pulse_and_durations
         if format == 'pad':
             for pulse_and_duration in pads:
@@ -115,7 +119,7 @@ def plot(raw: str) -> int:
         import matplotlib.pyplot as plt
     except ModuleNotFoundError:
         raise RuntimeError('For the plot command you need matplotlib, install it with: pip install matplotlib')
-    rifl = RiflFile.load(raw)
+    rifl = Rifl.load(raw)
     pads = rifl.pulse_and_durations
     signal = pad_to_signal(pads)
     fig, ax = plt.subplots()
@@ -128,7 +132,7 @@ def plot(raw: str) -> int:
 
 
 def check(raw: str) -> int:
-    rifl = RiflFile.load(raw)
+    rifl = Rifl.load(raw)
     pads = rifl.pulse_and_durations
     signal = pad_to_signal(pads)
     signal_autocorrelation = autocorrelate(signal)

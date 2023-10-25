@@ -5,7 +5,7 @@ from unittest import TestCase
 import numpy
 from numpy.testing import assert_array_equal
 
-from flipper_raw_rfid import RiflFile
+from flipper_raw_rfid.rifl import Rifl
 from flipper_raw_rfid.utils import pad_to_signal, signal_to_pad
 
 TEST_BASE_PATH = (Path(__file__).parent).absolute()
@@ -43,8 +43,8 @@ class UtilsTest(TestCase):
             [266, 515]
         ])
 
-    def load(self, file: str | Path) -> RiflFile:
-        return RiflFile.load(TEST_BASE_PATH / 'assets' / file)
+    def load(self, file: str | Path) -> Rifl:
+        return Rifl.load(TEST_BASE_PATH / 'assets' / file)
 
     def test_pad_to_signal(self):
 

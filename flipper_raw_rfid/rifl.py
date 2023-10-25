@@ -74,7 +74,7 @@ class RiflHeader:
 
 
 @dataclass
-class RiflFile:
+class Rifl:
     """
     A raw rfid file from flipper (xyz.ask.raw or xyz.psk.raw)
 
@@ -101,16 +101,16 @@ class RiflFile:
     """
 
     @staticmethod
-    def load(path: Path | str) -> RiflFile:
+    def load(path: Path | str) -> Rifl:
         path = Path(path)
         with path.open('rb') as f:
-            return RiflFile.from_io(f)
+            return Rifl.from_io(f)
 
     @staticmethod
-    def from_io(io: BinaryIO) -> RiflFile:
+    def from_io(io: BinaryIO) -> Rifl:
         header = RiflHeader.from_io(io)
-        pads = numpy.array(list(RiflFile._pulse_and_durations(io, header.max_buffer_size)), dtype=numpy.int64)
-        return RiflFile(header, pads)
+        pads = numpy.array(list(Rifl._pulse_and_durations(io, header.max_buffer_size)), dtype=numpy.int64)
+        return Rifl(header, pads)
 
     def save(self, path: Path | str) -> None:
         path = Path(path)
@@ -135,8 +135,8 @@ class RiflFile:
         buffer = BytesIO()
         for pulse, duration in self.pulse_and_durations:
             pair_buffer = BytesIO()
-            RiflFile.write_varint(pair_buffer, pulse)
-            RiflFile.write_varint(pair_buffer, duration)
+            Rifl.write_varint(pair_buffer, pulse)
+            Rifl.write_varint(pair_buffer, duration)
             buffer = write_pair(buffer, pair_buffer)
 
         write(buffer)
@@ -166,8 +166,8 @@ class RiflFile:
         """
         loop through buffers and yield a pulse and duration tuple
         """
-        for buffer in RiflFile._buffers(io, max_buffer_size):
-            for pulse, duration in batched(RiflFile.read_varint(buffer), 2):
+        for buffer in Rifl._buffers(io, max_buffer_size):
+            for pulse, duration in batched(Rifl.read_varint(buffer), 2):
                 yield pulse, duration
 
     @staticmethod
@@ -206,4 +206,4 @@ class RiflFile:
         return i
 
 
-__all__ = ['RiflFile', 'RiflError']
+__all__ = ['Rifl', 'RiflError']
